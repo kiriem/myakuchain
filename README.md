@@ -1,9 +1,8 @@
 # みゃくぷよ！
 
-「みゃくぷよ」は、こみゃくを使ったぷよぷよ風パズルゲームです。
+「みゃくぷよ」は、こみゃくを使った落ちものパズルゲームです。
 
-<img width="1529" height="1067" alt="スクリーンショット 2026-01-02 23 27 11" src="https://github.com/user-attachments/assets/a88ebb0d-5599-4ea4-aae1-8a266b5b1809" />
-
+<img width="1529" height="1067" alt="Image" src="https://github.com/user-attachments/assets/69ac37e4-f465-4c23-b06d-96213e191237" />
 
 
 ## 遊び方

@@ -39,15 +39,10 @@
             width: 100%;
             max-width: 450px;
         }
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 900;
-            color: #E8344E;
-            text-shadow:
-                2px 2px 0 white,
-                4px 4px 0 #3B82F6;
+        #game-logo {
+            max-width: 280px;
+            height: auto;
             margin-bottom: 10px;
-            letter-spacing: 0.05em;
         }
         #game-container {
             border-radius: 15px;
@@ -146,8 +141,8 @@
             #keyboard-controls {
                 display: none;
             }
-            h1 {
-                font-size: 1.8rem;
+            #game-logo {
+                max-width: 220px;
                 margin-bottom: 8px;
             }
             .control-btn {
@@ -199,7 +194,7 @@
 </head>
 <body>
     <main>
-        <h1>みゃくぷよ！</h1>
+        <img src="img/logo.png" alt="みゃくぷよ！" id="game-logo">
         <div id="game-container"></div>
 
         <!-- スマホ用コントロール -->

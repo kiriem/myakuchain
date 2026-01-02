@@ -1,4 +1,4 @@
-// ぷよぷよゲーム - p5.js実装（ポップデザイン版）
+// パズルゲーム - p5.js実装（ポップデザイン版）
 
 // ゲーム設定
 const COLS = 6;
@@ -28,18 +28,18 @@ const SHADOW_COLORS = [
 
 // ゲーム変数
 let field;
-let currentPuyo;
-let nextPuyo;
-let nextNextPuyo;
+let currentPiece;
+let nextPiece;
+let nextNextPiece;
 let gameState;
 let dropTimer;
 let dropInterval;
 let score;
 let chainCount;
 let eraseTimer;
-let erasingPuyos;
-let puyoImages = {};
-let puyoStates = {};
+let erasingPieces;
+let pieceImages = {};
+let pieceStates = {};
 
 // アニメーション用
 let globalTime = 0;
@@ -53,10 +53,10 @@ let fieldOffsetX;
 let fieldOffsetY;
 
 function preload() {
-    puyoImages['red'] = loadImage('svg/puyo_red.svg');
-    puyoImages['green'] = loadImage('svg/puyo_green.svg');
-    puyoImages['blue'] = loadImage('svg/puyo_blue.svg');
-    puyoImages['yellow'] = loadImage('svg/puyo_yellow.svg');
+    pieceImages['red'] = loadImage('svg/piece_red.svg');
+    pieceImages['green'] = loadImage('svg/piece_green.svg');
+    pieceImages['blue'] = loadImage('svg/piece_blue.svg');
+    pieceImages['yellow'] = loadImage('svg/piece_yellow.svg');
 }
 
 function setup() {
@@ -86,41 +86,41 @@ function initGame() {
     score = 0;
     chainCount = 0;
     eraseTimer = 0;
-    erasingPuyos = [];
-    puyoStates = {};
+    erasingPieces = [];
+    pieceStates = {};
     particles = [];
     chainPopups = [];
 
-    nextPuyo = createPuyoPair();
-    nextNextPuyo = createPuyoPair();
-    spawnPuyo();
+    nextPiece = createPiecePair();
+    nextNextPiece = createPiecePair();
+    spawnPiece();
 }
 
-function createPuyoPair() {
+function createPiecePair() {
     return {
         color1: floor(random(1, NUM_COLORS + 1)),
         color2: floor(random(1, NUM_COLORS + 1))
     };
 }
 
-function spawnPuyo() {
-    currentPuyo = {
+function spawnPiece() {
+    currentPiece = {
         x: 2,
         y: 1,
-        color1: nextPuyo.color1,
-        color2: nextPuyo.color2,
+        color1: nextPiece.color1,
+        color2: nextPiece.color2,
         rotation: 0
     };
 
-    nextPuyo = nextNextPuyo;
-    nextNextPuyo = createPuyoPair();
+    nextPiece = nextNextPiece;
+    nextNextPiece = createPiecePair();
 
-    if (!canPlace(currentPuyo.x, currentPuyo.y, currentPuyo.rotation)) {
+    if (!canPlace(currentPiece.x, currentPiece.y, currentPiece.rotation)) {
         gameState = STATE_GAMEOVER;
     }
 }
 
-function getSecondPuyoOffset(rotation) {
+function getSecondPieceOffset(rotation) {
     switch (rotation) {
         case 0: return { dx: 0, dy: -1 };
         case 1: return { dx: 1, dy: 0 };
@@ -130,7 +130,7 @@ function getSecondPuyoOffset(rotation) {
 }
 
 function canPlace(x, y, rotation) {
-    let offset = getSecondPuyoOffset(rotation);
+    let offset = getSecondPieceOffset(rotation);
     let x2 = x + offset.dx;
     let y2 = y + offset.dy;
 
@@ -143,49 +143,49 @@ function canPlace(x, y, rotation) {
 }
 
 function moveLeft() {
-    if (canPlace(currentPuyo.x - 1, currentPuyo.y, currentPuyo.rotation)) {
-        currentPuyo.x--;
+    if (canPlace(currentPiece.x - 1, currentPiece.y, currentPiece.rotation)) {
+        currentPiece.x--;
     }
 }
 
 function moveRight() {
-    if (canPlace(currentPuyo.x + 1, currentPuyo.y, currentPuyo.rotation)) {
-        currentPuyo.x++;
+    if (canPlace(currentPiece.x + 1, currentPiece.y, currentPiece.rotation)) {
+        currentPiece.x++;
     }
 }
 
 function rotateLeft() {
-    let newRotation = (currentPuyo.rotation + 3) % 4;
-    if (canPlace(currentPuyo.x, currentPuyo.y, newRotation)) {
-        currentPuyo.rotation = newRotation;
-    } else if (canPlace(currentPuyo.x + 1, currentPuyo.y, newRotation)) {
-        currentPuyo.x++;
-        currentPuyo.rotation = newRotation;
-    } else if (canPlace(currentPuyo.x - 1, currentPuyo.y, newRotation)) {
-        currentPuyo.x--;
-        currentPuyo.rotation = newRotation;
+    let newRotation = (currentPiece.rotation + 3) % 4;
+    if (canPlace(currentPiece.x, currentPiece.y, newRotation)) {
+        currentPiece.rotation = newRotation;
+    } else if (canPlace(currentPiece.x + 1, currentPiece.y, newRotation)) {
+        currentPiece.x++;
+        currentPiece.rotation = newRotation;
+    } else if (canPlace(currentPiece.x - 1, currentPiece.y, newRotation)) {
+        currentPiece.x--;
+        currentPiece.rotation = newRotation;
     }
 }
 
 function rotateRight() {
-    let newRotation = (currentPuyo.rotation + 1) % 4;
-    if (canPlace(currentPuyo.x, currentPuyo.y, newRotation)) {
-        currentPuyo.rotation = newRotation;
-    } else if (canPlace(currentPuyo.x + 1, currentPuyo.y, newRotation)) {
-        currentPuyo.x++;
-        currentPuyo.rotation = newRotation;
-    } else if (canPlace(currentPuyo.x - 1, currentPuyo.y, newRotation)) {
-        currentPuyo.x--;
-        currentPuyo.rotation = newRotation;
+    let newRotation = (currentPiece.rotation + 1) % 4;
+    if (canPlace(currentPiece.x, currentPiece.y, newRotation)) {
+        currentPiece.rotation = newRotation;
+    } else if (canPlace(currentPiece.x + 1, currentPiece.y, newRotation)) {
+        currentPiece.x++;
+        currentPiece.rotation = newRotation;
+    } else if (canPlace(currentPiece.x - 1, currentPiece.y, newRotation)) {
+        currentPiece.x--;
+        currentPiece.rotation = newRotation;
     }
 }
 
 function canDrop() {
-    let offset = getSecondPuyoOffset(currentPuyo.rotation);
-    let x1 = currentPuyo.x;
-    let y1 = currentPuyo.y + 1;
-    let x2 = currentPuyo.x + offset.dx;
-    let y2 = currentPuyo.y + offset.dy + 1;
+    let offset = getSecondPieceOffset(currentPiece.rotation);
+    let x1 = currentPiece.x;
+    let y1 = currentPiece.y + 1;
+    let x2 = currentPiece.x + offset.dx;
+    let y2 = currentPiece.y + offset.dy + 1;
 
     if (y1 >= TOTAL_ROWS || y2 >= TOTAL_ROWS) return false;
     if (field[y1][x1] !== 0 || field[y2][x2] !== 0) return false;
@@ -193,28 +193,28 @@ function canDrop() {
     return true;
 }
 
-function placePuyo() {
-    let offset = getSecondPuyoOffset(currentPuyo.rotation);
-    let x1 = currentPuyo.x;
-    let y1 = currentPuyo.y;
-    let x2 = currentPuyo.x + offset.dx;
-    let y2 = currentPuyo.y + offset.dy;
+function placePiece() {
+    let offset = getSecondPieceOffset(currentPiece.rotation);
+    let x1 = currentPiece.x;
+    let y1 = currentPiece.y;
+    let x2 = currentPiece.x + offset.dx;
+    let y2 = currentPiece.y + offset.dy;
 
     if (y1 >= 0 && y1 < TOTAL_ROWS) {
-        field[y1][x1] = currentPuyo.color1;
-        initPuyoState(x1, y1);
+        field[y1][x1] = currentPiece.color1;
+        initPieceState(x1, y1);
     }
     if (y2 >= 0 && y2 < TOTAL_ROWS) {
-        field[y2][x2] = currentPuyo.color2;
-        initPuyoState(x2, y2);
+        field[y2][x2] = currentPiece.color2;
+        initPieceState(x2, y2);
     }
 
     gameState = STATE_DROPPING;
 }
 
-function initPuyoState(x, y) {
+function initPieceState(x, y) {
     let key = x + ',' + y;
-    puyoStates[key] = {
+    pieceStates[key] = {
         blinking: false,
         blinkFrame: 0,
         nextBlink: floor(random(60, 300)),
@@ -225,16 +225,16 @@ function initPuyoState(x, y) {
     };
 }
 
-function updatePuyoStates() {
+function updatePieceStates() {
     for (let y = 0; y < TOTAL_ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
             if (field[y][x] !== 0) {
                 let key = x + ',' + y;
-                if (!puyoStates[key]) {
-                    initPuyoState(x, y);
+                if (!pieceStates[key]) {
+                    initPieceState(x, y);
                 }
 
-                let state = puyoStates[key];
+                let state = pieceStates[key];
 
                 // スケールを徐々に1に戻す
                 state.scale = lerp(state.scale, 1, 0.15);
@@ -260,12 +260,12 @@ function updatePuyoStates() {
     }
 }
 
-function getPuyoState(x, y) {
+function getPieceState(x, y) {
     let key = x + ',' + y;
-    return puyoStates[key] || { blinking: false, blinkFrame: 0, rotation: 0, wobbleOffset: 0, scale: 1, bounceY: 0 };
+    return pieceStates[key] || { blinking: false, blinkFrame: 0, rotation: 0, wobbleOffset: 0, scale: 1, bounceY: 0 };
 }
 
-function dropFieldPuyos() {
+function dropFieldPieces() {
     let dropped = false;
 
     for (let x = 0; x < COLS; x++) {
@@ -276,10 +276,10 @@ function dropFieldPuyos() {
 
                 let oldKey = x + ',' + y;
                 let newKey = x + ',' + (y + 1);
-                if (puyoStates[oldKey]) {
-                    puyoStates[newKey] = puyoStates[oldKey];
-                    puyoStates[newKey].bounceY = -3;  // 落下時のバウンス
-                    delete puyoStates[oldKey];
+                if (pieceStates[oldKey]) {
+                    pieceStates[newKey] = pieceStates[oldKey];
+                    pieceStates[newKey].bounceY = -3;  // 落下時のバウンス
+                    delete pieceStates[oldKey];
                 }
 
                 dropped = true;
@@ -331,20 +331,20 @@ function findConnected(x, y, color, checked, connected) {
     findConnected(x, y + 1, color, checked, connected);
 }
 
-function erasePuyos(puyoList) {
-    let erasedCount = puyoList.length;
+function erasePieces(pieceList) {
+    let erasedCount = pieceList.length;
     let chainBonus = Math.pow(2, chainCount);
     score += erasedCount * 10 * chainBonus;
 
     // パーティクル生成
-    for (let puyo of puyoList) {
-        let px = fieldOffsetX + puyo.x * CELL_SIZE + CELL_SIZE / 2;
-        let py = fieldOffsetY + (puyo.y - HIDDEN_ROWS) * CELL_SIZE + CELL_SIZE / 2;
-        createParticles(px, py, puyo.color);
+    for (let piece of pieceList) {
+        let px = fieldOffsetX + piece.x * CELL_SIZE + CELL_SIZE / 2;
+        let py = fieldOffsetY + (piece.y - HIDDEN_ROWS) * CELL_SIZE + CELL_SIZE / 2;
+        createParticles(px, py, piece.color);
 
-        field[puyo.y][puyo.x] = 0;
-        let key = puyo.x + ',' + puyo.y;
-        delete puyoStates[key];
+        field[piece.y][piece.x] = 0;
+        let key = piece.x + ',' + piece.y;
+        delete pieceStates[key];
     }
 
     // 連鎖ポップアップ
@@ -447,7 +447,7 @@ function draw() {
     // グラデーション背景
     drawBackground();
 
-    updatePuyoStates();
+    updatePieceStates();
     updateParticles();
     updateChainPopups();
 
@@ -470,9 +470,9 @@ function draw() {
     }
 
     drawField();
-    drawCurrentPuyo();
+    drawCurrentPiece();
     drawParticles();
-    drawNextPuyo();
+    drawNextPiece();
     drawScore();
     drawChainPopups();
 
@@ -506,23 +506,23 @@ function updatePlaying() {
     if (dropTimer >= dropInterval) {
         dropTimer = 0;
         if (canDrop()) {
-            currentPuyo.y++;
+            currentPiece.y++;
         } else {
-            placePuyo();
+            placePiece();
         }
     }
 }
 
 function updateDropping() {
-    if (!dropFieldPuyos()) {
+    if (!dropFieldPieces()) {
         gameState = STATE_CHECKING;
     }
 }
 
 function updateChecking() {
-    erasingPuyos = checkAndErase();
+    erasingPieces = checkAndErase();
 
-    if (erasingPuyos.length > 0) {
+    if (erasingPieces.length > 0) {
         chainCount++;
         eraseTimer = 0;
         gameState = STATE_ERASING;
@@ -532,7 +532,7 @@ function updateChecking() {
         if (checkGameOver()) {
             gameState = STATE_GAMEOVER;
         } else {
-            spawnPuyo();
+            spawnPiece();
             gameState = STATE_PLAYING;
         }
     }
@@ -542,14 +542,14 @@ function updateErasing() {
     eraseTimer++;
 
     if (eraseTimer >= 20) {
-        erasePuyos(erasingPuyos);
-        erasingPuyos = [];
+        erasePieces(erasingPieces);
+        erasingPieces = [];
         gameState = STATE_CHAIN_DROPPING;
     }
 }
 
 function updateChainDropping() {
-    if (!dropFieldPuyos()) {
+    if (!dropFieldPieces()) {
         gameState = STATE_CHECKING;
     }
 }
@@ -573,13 +573,13 @@ function drawField() {
              fieldOffsetX + CELL_SIZE * COLS, fieldOffsetY + y * CELL_SIZE);
     }
 
-    // ぷよを描画
+    // ピースを描画
     for (let y = HIDDEN_ROWS; y < TOTAL_ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
             if (field[y][x] !== 0) {
-                let isErasing = erasingPuyos.some(p => p.x === x && p.y === y);
-                let puyoState = getPuyoState(x, y);
-                drawPuyo(x, y - HIDDEN_ROWS, field[y][x], isErasing, puyoState);
+                let isErasing = erasingPieces.some(p => p.x === x && p.y === y);
+                let pieceState = getPieceState(x, y);
+                drawPiece(x, y - HIDDEN_ROWS, field[y][x], isErasing, pieceState);
             }
         }
     }
@@ -588,18 +588,18 @@ function drawField() {
     drawDeathMark();
 }
 
-function drawPuyo(gridX, gridY, colorIndex, isErasing = false, puyoState = null) {
+function drawPiece(gridX, gridY, colorIndex, isErasing = false, pieceState = null) {
     let x = fieldOffsetX + gridX * CELL_SIZE + CELL_SIZE / 2;
     let y = fieldOffsetY + gridY * CELL_SIZE + CELL_SIZE / 2;
     let size = CELL_SIZE * 0.85;
 
     let colorName = COLOR_NAMES[colorIndex];
-    if (!colorName || !puyoImages[colorName]) return;
+    if (!colorName || !pieceImages[colorName]) return;
 
-    let rotation = puyoState ? puyoState.rotation : 0;
-    let wobbleOffset = puyoState ? puyoState.wobbleOffset : 0;
-    let puyoScale = puyoState ? puyoState.scale : 1;
-    let bounceY = puyoState ? puyoState.bounceY : 0;
+    let rotation = pieceState ? pieceState.rotation : 0;
+    let wobbleOffset = pieceState ? pieceState.wobbleOffset : 0;
+    let pieceScale = pieceState ? pieceState.scale : 1;
+    let bounceY = pieceState ? pieceState.bounceY : 0;
 
     // ゆらゆらアニメーション
     let wobble = sin(globalTime * 2 + wobbleOffset) * 2;
@@ -618,25 +618,25 @@ function drawPuyo(gridX, gridY, colorIndex, isErasing = false, puyoState = null)
     imageMode(CENTER);
     translate(x, y + bounceY + wobble);
     rotate(radians(rotation));
-    let finalScale = puyoScale * scaleWobble;
-    image(puyoImages[colorName], 0, 0, size * finalScale, size * finalScale);
+    let finalScale = pieceScale * scaleWobble;
+    image(pieceImages[colorName], 0, 0, size * finalScale, size * finalScale);
     pop();
 
     // 目
     if (!isErasing) {
-        drawEye(x, y + bounceY + wobble, size * puyoScale * scaleWobble, puyoState);
+        drawEye(x, y + bounceY + wobble, size * pieceScale * scaleWobble, pieceState);
     }
 }
 
-function drawEye(x, y, size, puyoState) {
+function drawEye(x, y, size, pieceState) {
     let eyeOffsetX = size * 0.12;
     let eyeOffsetY = -size * 0.10;
     let eyeRadius = size * 0.18;
     let pupilRadius = size * 0.09;
 
-    let isBlinking = puyoState && puyoState.blinking;
-    let blinkProgress = isBlinking ? puyoState.blinkFrame / 8 : 0;
-    let puyoRotation = puyoState ? puyoState.rotation : 0;
+    let isBlinking = pieceState && pieceState.blinking;
+    let blinkProgress = isBlinking ? pieceState.blinkFrame / 8 : 0;
+    let pieceRotation = pieceState ? pieceState.rotation : 0;
 
     let closedness = 0;
     if (isBlinking) {
@@ -647,7 +647,7 @@ function drawEye(x, y, size, puyoState) {
         }
     }
 
-    let rotRad = radians(puyoRotation);
+    let rotRad = radians(pieceRotation);
     let rotatedEyeX = eyeOffsetX * cos(rotRad) - eyeOffsetY * sin(rotRad);
     let rotatedEyeY = eyeOffsetX * sin(rotRad) + eyeOffsetY * cos(rotRad);
 
@@ -674,34 +674,34 @@ function drawEye(x, y, size, puyoState) {
     pop();
 }
 
-function drawCurrentPuyo() {
-    if (gameState !== STATE_PLAYING || !currentPuyo) return;
+function drawCurrentPiece() {
+    if (gameState !== STATE_PLAYING || !currentPiece) return;
 
-    let offset = getSecondPuyoOffset(currentPuyo.rotation);
-    let y1 = currentPuyo.y - HIDDEN_ROWS;
-    let y2 = currentPuyo.y + offset.dy - HIDDEN_ROWS;
+    let offset = getSecondPieceOffset(currentPiece.rotation);
+    let y1 = currentPiece.y - HIDDEN_ROWS;
+    let y2 = currentPiece.y + offset.dy - HIDDEN_ROWS;
 
     let openState = { blinking: false, blinkFrame: 0, rotation: 0, wobbleOffset: 0, scale: 1, bounceY: 0 };
 
     if (y1 >= 0) {
-        drawPuyo(currentPuyo.x, y1, currentPuyo.color1, false, openState);
+        drawPiece(currentPiece.x, y1, currentPiece.color1, false, openState);
     }
     if (y2 >= 0) {
-        drawPuyo(currentPuyo.x + offset.dx, y2, currentPuyo.color2, false, openState);
+        drawPiece(currentPiece.x + offset.dx, y2, currentPiece.color2, false, openState);
     }
 
     drawGhost();
 }
 
 function drawGhost() {
-    let ghostY = currentPuyo.y;
+    let ghostY = currentPiece.y;
 
     while (true) {
-        let offset = getSecondPuyoOffset(currentPuyo.rotation);
+        let offset = getSecondPieceOffset(currentPiece.rotation);
         let y1 = ghostY + 1;
         let y2 = ghostY + offset.dy + 1;
-        let x1 = currentPuyo.x;
-        let x2 = currentPuyo.x + offset.dx;
+        let x1 = currentPiece.x;
+        let x2 = currentPiece.x + offset.dx;
 
         if (y1 >= TOTAL_ROWS || y2 >= TOTAL_ROWS) break;
         if (field[y1][x1] !== 0 || field[y2][x2] !== 0) break;
@@ -709,32 +709,32 @@ function drawGhost() {
         ghostY++;
     }
 
-    if (ghostY === currentPuyo.y) return;
+    if (ghostY === currentPiece.y) return;
 
-    let offset = getSecondPuyoOffset(currentPuyo.rotation);
+    let offset = getSecondPieceOffset(currentPiece.rotation);
     let gy1 = ghostY - HIDDEN_ROWS;
     let gy2 = ghostY + offset.dy - HIDDEN_ROWS;
 
-    if (gy1 >= 0) drawGhostPuyo(currentPuyo.x, gy1, currentPuyo.color1);
-    if (gy2 >= 0) drawGhostPuyo(currentPuyo.x + offset.dx, gy2, currentPuyo.color2);
+    if (gy1 >= 0) drawGhostPiece(currentPiece.x, gy1, currentPiece.color1);
+    if (gy2 >= 0) drawGhostPiece(currentPiece.x + offset.dx, gy2, currentPiece.color2);
 }
 
-function drawGhostPuyo(gridX, gridY, colorIndex) {
+function drawGhostPiece(gridX, gridY, colorIndex) {
     let x = fieldOffsetX + gridX * CELL_SIZE + CELL_SIZE / 2;
     let y = fieldOffsetY + gridY * CELL_SIZE + CELL_SIZE / 2;
     let size = CELL_SIZE * 0.85;
 
     let colorName = COLOR_NAMES[colorIndex];
-    if (!colorName || !puyoImages[colorName]) return;
+    if (!colorName || !pieceImages[colorName]) return;
 
     push();
     imageMode(CENTER);
     tint(255, 60);
-    image(puyoImages[colorName], x, y, size, size);
+    image(pieceImages[colorName], x, y, size, size);
     pop();
 }
 
-function drawNextPuyo() {
+function drawNextPiece() {
     let nextX = fieldOffsetX + CELL_SIZE * COLS + 25;
     let nextY = fieldOffsetY;
     let boxWidth = 90;
@@ -755,9 +755,9 @@ function drawNextPuyo() {
     textAlign(CENTER, TOP);
     text('NEXT', nextX + boxWidth / 2, nextY + 10);
 
-    // NEXTぷよ
-    drawSmallPuyo(nextX + boxWidth / 2, nextY + 55, nextPuyo.color2, 1.2);
-    drawSmallPuyo(nextX + boxWidth / 2, nextY + 100, nextPuyo.color1, 1.2);
+    // NEXTピース
+    drawSmallPiece(nextX + boxWidth / 2, nextY + 55, nextPiece.color2, 1.2);
+    drawSmallPiece(nextX + boxWidth / 2, nextY + 100, nextPiece.color1, 1.2);
 
     // NEXT NEXT ボックス
     let nextNextY = nextY + boxHeight1 + 15;
@@ -771,19 +771,19 @@ function drawNextPuyo() {
     textSize(12);
     text('NEXT', nextX + boxWidth / 2, nextNextY + 8);
 
-    drawSmallPuyo(nextX + boxWidth / 2, nextNextY + 45, nextNextPuyo.color2, 0.9);
-    drawSmallPuyo(nextX + boxWidth / 2, nextNextY + 80, nextNextPuyo.color1, 0.9);
+    drawSmallPiece(nextX + boxWidth / 2, nextNextY + 45, nextNextPiece.color2, 0.9);
+    drawSmallPiece(nextX + boxWidth / 2, nextNextY + 80, nextNextPiece.color1, 0.9);
 }
 
-function drawSmallPuyo(x, y, colorIndex, puyoScale = 1.0) {
+function drawSmallPiece(x, y, colorIndex, pieceScale = 1.0) {
     let colorName = COLOR_NAMES[colorIndex];
-    if (!colorName || !puyoImages[colorName]) return;
+    if (!colorName || !pieceImages[colorName]) return;
 
-    let size = 30 * puyoScale;
+    let size = 30 * pieceScale;
 
     push();
     imageMode(CENTER);
-    image(puyoImages[colorName], x, y, size, size);
+    image(pieceImages[colorName], x, y, size, size);
     pop();
 
     drawSmallEye(x, y, size);

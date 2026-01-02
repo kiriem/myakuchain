@@ -1,6 +1,6 @@
-# みゃくぷよ！
+# みゃくちぇいん！
 
-「みゃくぷよ」は、こみゃくを使った落ちものパズルゲームです。
+「みゃくちぇいん」は、こみゃくを使った落ちものパズルゲームです。
 
 <img width="1529" height="1067" alt="Image" src="https://github.com/user-attachments/assets/69ac37e4-f465-4c23-b06d-96213e191237" />
 

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>みゃくぷよ</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html, body {
+            height: 100%;
+            overflow: auto;
+            touch-action: manipulation;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            background: url('svg/background.svg') center center / cover fixed;
+            font-family: 'Zen Maru Gothic', sans-serif;
+            padding: 10px;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 450px;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #E8344E;
+            text-shadow:
+                2px 2px 0 white,
+                4px 4px 0 #3B82F6;
+            margin-bottom: 10px;
+            letter-spacing: 0.05em;
+        }
+        #game-container {
+            border-radius: 15px;
+            box-shadow:
+                0 10px 40px rgba(0,0,0,0.2),
+                0 0 0 4px rgba(255,255,255,0.8);
+            overflow: hidden;
+            background: white;
+        }
+
+        /* コントロールパネル */
+        #control-panel {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .control-btn {
+            width: 70px;
+            height: 55px;
+            border: none;
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 方向ボタン - 青 */
+        .btn-move {
+            background: linear-gradient(180deg, #60A5FA 0%, #3B82F6 100%);
+            color: white;
+            box-shadow: 0 4px 0 #1D4ED8, 0 6px 10px rgba(0,0,0,0.2);
+            width: 150px;
+        }
+        .btn-move:active {
+            box-shadow: 0 2px 0 #1D4ED8, 0 3px 5px rgba(0,0,0,0.2);
+            transform: translateY(2px);
+        }
+
+        /* 回転ボタン - 赤 */
+        .btn-rotate {
+            background: linear-gradient(180deg, #F87171 0%, #E8344E 100%);
+            color: white;
+            box-shadow: 0 4px 0 #B91C1C, 0 6px 10px rgba(0,0,0,0.2);
+        }
+        .btn-rotate:active {
+            box-shadow: 0 2px 0 #B91C1C, 0 3px 5px rgba(0,0,0,0.2);
+            transform: translateY(2px);
+        }
+
+        /* 落下ボタン */
+        .btn-drop {
+            background: linear-gradient(180deg, #A78BFA 0%, #7C3AED 100%);
+            color: white;
+            box-shadow: 0 4px 0 #5B21B6, 0 6px 10px rgba(0,0,0,0.2);
+            width: 150px;
+        }
+        .btn-drop:active {
+            box-shadow: 0 2px 0 #5B21B6, 0 3px 5px rgba(0,0,0,0.2);
+            transform: translateY(2px);
+        }
+
+        /* PC向けキーボード操作説明 */
+        #keyboard-controls {
+            color: #374151;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.8rem;
+            background: rgba(255,255,255,0.9);
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* スマホ調整 */
+        @media (max-width: 600px) {
+            #keyboard-controls {
+                display: none;
+            }
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 8px;
+            }
+            .control-btn {
+                width: 65px;
+                height: 50px;
+            }
+            .btn-drop {
+                width: 140px;
+            }
+            .btn-move {
+                width: 140px;
+            }
+        }
+
+        /* PC調整 */
+        @media (min-width: 601px) {
+            #control-panel {
+                max-width: 350px;
+            }
+            .control-btn {
+                width: 60px;
+                height: 45px;
+                font-size: 20px;
+            }
+            .btn-drop {
+                width: 130px;
+            }
+            .btn-move {
+                width: 130px;
+            }
+        }
+
+        /* クレジット */
+        .credit {
+            margin-top: 20px;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #6B7280;
+        }
+        .credit a {
+            color: #3B82F6;
+            text-decoration: none;
+        }
+        .credit a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>みゃくぷよ！</h1>
+        <div id="game-container"></div>
+
+        <!-- スマホ用コントロール -->
+        <div id="control-panel">
+            <div class="control-row">
+                <button class="control-btn btn-rotate" id="btn-rotate-left">↺</button>
+                <button class="control-btn btn-drop" id="btn-drop">▼ DROP</button>
+                <button class="control-btn btn-rotate" id="btn-rotate-right">↻</button>
+            </div>
+            <div class="control-row">
+                <button class="control-btn btn-move" id="btn-left">◀</button>
+                <button class="control-btn btn-move" id="btn-right">▶</button>
+            </div>
+        </div>
+
+        <!-- PC用キーボード説明 -->
+        <div id="keyboard-controls">
+            ← → : Move | ↑ Z : Rotate Left | X : Rotate Right | ↓ : Drop | R : Restart
+        </div>
+
+        <!-- クレジット -->
+        <footer class="credit">
+            Created by Kirie Miyajima <a href="https://x.com/kiriem_" target="_blank">@kiriem_</a>
+        </footer>
+    </main>
+    <script src="sketch.js"></script>
+    <script>
+        // タッチボタンの処理
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnLeft = document.getElementById('btn-left');
+            const btnRight = document.getElementById('btn-right');
+            const btnRotateLeft = document.getElementById('btn-rotate-left');
+            const btnRotateRight = document.getElementById('btn-rotate-right');
+            const btnDrop = document.getElementById('btn-drop');
+
+            let dropIntervalId = null;
+
+            function setupButton(btn, action, isHold = false) {
+                const startEvent = function(e) {
+                    e.preventDefault();
+                    action();
+                    if (isHold) {
+                        dropIntervalId = setInterval(action, 50);
+                    }
+                };
+
+                const endEvent = function(e) {
+                    e.preventDefault();
+                    if (isHold && dropIntervalId) {
+                        clearInterval(dropIntervalId);
+                        dropIntervalId = null;
+                        if (typeof window.onDropRelease === 'function') {
+                            window.onDropRelease();
+                        }
+                    }
+                };
+
+                btn.addEventListener('touchstart', startEvent, { passive: false });
+                btn.addEventListener('mousedown', startEvent);
+
+                if (isHold) {
+                    btn.addEventListener('touchend', endEvent);
+                    btn.addEventListener('touchcancel', endEvent);
+                    btn.addEventListener('mouseup', endEvent);
+                    btn.addEventListener('mouseleave', endEvent);
+                }
+            }
+
+            setupButton(btnLeft, function() {
+                if (typeof window.onMoveLeft === 'function') window.onMoveLeft();
+            });
+
+            setupButton(btnRight, function() {
+                if (typeof window.onMoveRight === 'function') window.onMoveRight();
+            });
+
+            setupButton(btnRotateLeft, function() {
+                if (typeof window.onRotateLeft === 'function') window.onRotateLeft();
+            });
+
+            setupButton(btnRotateRight, function() {
+                if (typeof window.onRotateRight === 'function') window.onRotateRight();
+            });
+
+            setupButton(btnDrop, function() {
+                if (typeof window.onDropStart === 'function') window.onDropStart();
+            }, true);
+        });
+    </script>
+</body>
+</html>

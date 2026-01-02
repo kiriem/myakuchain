@@ -1,0 +1,262 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+  <style>
+    /* ゆっくり浮遊アニメーション（滑らか・開始位置0） */
+    @keyframes floatSlow1 {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes floatSlow2 {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* 上下にゆっくり移動（滑らか・開始位置0） */
+    @keyframes riseUp1 {
+      0%, 100% { transform: translateY(0px); }
+      25% { transform: translateY(-8px); }
+      50% { transform: translateY(0px); }
+      75% { transform: translateY(8px); }
+    }
+    @keyframes riseUp2 {
+      0%, 100% { transform: translateY(0px); }
+      25% { transform: translateY(6px); }
+      50% { transform: translateY(0px); }
+      75% { transform: translateY(-6px); }
+    }
+
+    /* ゆっくり伸縮アニメーション（滑らか） */
+    @keyframes wobbleSlow {
+      0%, 100% { transform: scale(1, 1); }
+      50% { transform: scale(1.03, 0.97); }
+    }
+
+    /* 組み合わせ（滑らか・開始位置0） */
+    @keyframes floatWobbleSlow {
+      0%, 100% { transform: translateY(0px) scale(1, 1); }
+      50% { transform: translateY(-8px) scale(1.02, 0.98); }
+    }
+
+    /* 瞬きアニメーション */
+    @keyframes blink1 {
+      0%, 45%, 55%, 100% { transform: scaleY(1); }
+      48% { transform: scaleY(0.3); }
+      50% { transform: scaleY(0.1); }
+      52% { transform: scaleY(0.3); }
+    }
+    @keyframes blink2 {
+      0%, 40%, 50%, 100% { transform: scaleY(1); }
+      43% { transform: scaleY(0.3); }
+      45% { transform: scaleY(0.1); }
+      47% { transform: scaleY(0.3); }
+    }
+    @keyframes blink3 {
+      0%, 30%, 35%, 70%, 75%, 100% { transform: scaleY(1); }
+      32% { transform: scaleY(0.1); }
+      72% { transform: scaleY(0.1); }
+    }
+
+    .komyaku-slow1 { animation: floatSlow1 10s ease-in-out infinite; }
+    .komyaku-slow2 { animation: floatSlow2 12s ease-in-out infinite; }
+    .komyaku-rise1 { animation: riseUp1 14s ease-in-out infinite; }
+    .komyaku-rise2 { animation: riseUp2 16s ease-in-out infinite; }
+    .komyaku-wobble { animation: wobbleSlow 8s ease-in-out infinite; }
+    .komyaku-combo { animation: floatWobbleSlow 11s ease-in-out infinite; }
+
+    .blob-float { animation: floatSlow1 14s ease-in-out infinite; }
+
+    .eye-blink1 { animation: blink1 4s ease-in-out infinite; transform-box: fill-box; transform-origin: center center; }
+    .eye-blink2 { animation: blink2 5s ease-in-out infinite; transform-box: fill-box; transform-origin: center center; }
+    .eye-blink3 { animation: blink3 6s ease-in-out infinite; transform-box: fill-box; transform-origin: center center; }
+  </style>
+
+  <defs>
+    <!-- Gr02風: しずく型（水滴）上が尖って下が丸い -->
+    <g id="komyaku-drop-red">
+      <path d="M0,-40 C8,-40 18,-25 22,-5 C26,20 20,38 0,42 C-20,38 -26,20 -22,-5 C-18,-25 -8,-40 0,-40 Z" fill="#E8344E"/>
+      <g class="eye-blink1"><circle cx="0" cy="-15" r="11" fill="white"/><circle cx="3" cy="-18" r="5" fill="#9F1239"/></g>
+    </g>
+    <g id="komyaku-drop-blue">
+      <path d="M0,-40 C8,-40 18,-25 22,-5 C26,20 20,38 0,42 C-20,38 -26,20 -22,-5 C-18,-25 -8,-40 0,-40 Z" fill="#3B82F6"/>
+      <g class="eye-blink2"><circle cx="0" cy="-15" r="11" fill="white"/><circle cx="3" cy="-18" r="5" fill="#1E3A8A"/></g>
+    </g>
+    <g id="komyaku-drop-green">
+      <path d="M0,-40 C8,-40 18,-25 22,-5 C26,20 20,38 0,42 C-20,38 -26,20 -22,-5 C-18,-25 -8,-40 0,-40 Z" fill="#22C55E"/>
+      <g class="eye-blink3"><circle cx="0" cy="-15" r="11" fill="white"/><circle cx="3" cy="-18" r="5" fill="#166534"/></g>
+    </g>
+    <g id="komyaku-drop-yellow">
+      <path d="M0,-40 C8,-40 18,-25 22,-5 C26,20 20,38 0,42 C-20,38 -26,20 -22,-5 C-18,-25 -8,-40 0,-40 Z" fill="#FBBF24"/>
+      <g class="eye-blink1"><circle cx="0" cy="-15" r="11" fill="white"/><circle cx="3" cy="-18" r="5" fill="#B45309"/></g>
+    </g>
+
+    <!-- Gr01風: 大きな丸に滑らかなしっぽ（シンプル版） -->
+    <g id="komyaku-tail-red">
+      <path d="M10,-30 C35,-25 45,-5 42,18 C39,38 18,45 -8,42 C-30,40 -45,25 -45,5 C-45,-12 -55,-5 -60,8 C-55,18 -45,15 -40,5 C-38,-8 -30,-25 -8,-30 C8,-33 10,-30 10,-30 Z" fill="#E8344E"/>
+      <g class="eye-blink2"><circle cx="12" cy="2" r="13" fill="white"/><circle cx="18" cy="-1" r="6" fill="#9F1239"/></g>
+    </g>
+    <g id="komyaku-tail-blue">
+      <path d="M10,-30 C35,-25 45,-5 42,18 C39,38 18,45 -8,42 C-30,40 -45,25 -45,5 C-45,-12 -55,-5 -60,8 C-55,18 -45,15 -40,5 C-38,-8 -30,-25 -8,-30 C8,-33 10,-30 10,-30 Z" fill="#3B82F6"/>
+      <g class="eye-blink1"><circle cx="12" cy="2" r="13" fill="white"/><circle cx="18" cy="-1" r="6" fill="#1E3A8A"/></g>
+    </g>
+    <g id="komyaku-tail-green">
+      <path d="M10,-30 C35,-25 45,-5 42,18 C39,38 18,45 -8,42 C-30,40 -45,25 -45,5 C-45,-12 -55,-5 -60,8 C-55,18 -45,15 -40,5 C-38,-8 -30,-25 -8,-30 C8,-33 10,-30 10,-30 Z" fill="#22C55E"/>
+      <g class="eye-blink3"><circle cx="12" cy="2" r="13" fill="white"/><circle cx="18" cy="-1" r="6" fill="#166534"/></g>
+    </g>
+    <g id="komyaku-tail-yellow">
+      <path d="M10,-30 C35,-25 45,-5 42,18 C39,38 18,45 -8,42 C-30,40 -45,25 -45,5 C-45,-12 -55,-5 -60,8 C-55,18 -45,15 -40,5 C-38,-8 -30,-25 -8,-30 C8,-33 10,-30 10,-30 Z" fill="#FBBF24"/>
+      <g class="eye-blink2"><circle cx="12" cy="2" r="13" fill="white"/><circle cx="18" cy="-1" r="6" fill="#B45309"/></g>
+    </g>
+
+    <!-- Gr05風: 豆型・まめ（丸みのある腎臓型） -->
+    <g id="komyaku-bean-red">
+      <path d="M-20,15 C-35,5 -35,-15 -20,-25 C-5,-35 20,-30 30,-15 C40,0 35,25 15,30 C-5,35 -5,25 -20,15 Z" fill="#E8344E"/>
+      <g class="eye-blink3"><circle cx="12" cy="-8" r="10" fill="white"/><circle cx="17" cy="-10" r="5" fill="#9F1239"/></g>
+    </g>
+    <g id="komyaku-bean-blue">
+      <path d="M-20,15 C-35,5 -35,-15 -20,-25 C-5,-35 20,-30 30,-15 C40,0 35,25 15,30 C-5,35 -5,25 -20,15 Z" fill="#3B82F6"/>
+      <g class="eye-blink1"><circle cx="12" cy="-8" r="10" fill="white"/><circle cx="17" cy="-10" r="5" fill="#1E3A8A"/></g>
+    </g>
+    <g id="komyaku-bean-green">
+      <path d="M-20,15 C-35,5 -35,-15 -20,-25 C-5,-35 20,-30 30,-15 C40,0 35,25 15,30 C-5,35 -5,25 -20,15 Z" fill="#22C55E"/>
+      <g class="eye-blink2"><circle cx="12" cy="-8" r="10" fill="white"/><circle cx="17" cy="-10" r="5" fill="#166534"/></g>
+    </g>
+    <g id="komyaku-bean-yellow">
+      <path d="M-20,15 C-35,5 -35,-15 -20,-25 C-5,-35 20,-30 30,-15 C40,0 35,25 15,30 C-5,35 -5,25 -20,15 Z" fill="#FBBF24"/>
+      <g class="eye-blink3"><circle cx="12" cy="-8" r="10" fill="white"/><circle cx="17" cy="-10" r="5" fill="#B45309"/></g>
+    </g>
+
+    <!-- Gr07/08風: 横長オーバル（ぷっくり丸い） -->
+    <g id="komyaku-flat-red">
+      <path d="M-30,5 C-38,-8 -30,-22 -10,-25 C15,-28 38,-18 42,-2 C46,15 35,28 10,30 C-18,32 -38,22 -30,5 Z" fill="#E8344E"/>
+      <g class="eye-blink1"><circle cx="18" cy="-5" r="10" fill="white"/><circle cx="23" cy="-7" r="5" fill="#9F1239"/></g>
+    </g>
+    <g id="komyaku-flat-blue">
+      <path d="M-30,5 C-38,-8 -30,-22 -10,-25 C15,-28 38,-18 42,-2 C46,15 35,28 10,30 C-18,32 -38,22 -30,5 Z" fill="#3B82F6"/>
+      <g class="eye-blink2"><circle cx="18" cy="-5" r="10" fill="white"/><circle cx="23" cy="-7" r="5" fill="#1E3A8A"/></g>
+    </g>
+    <g id="komyaku-flat-green">
+      <path d="M-30,5 C-38,-8 -30,-22 -10,-25 C15,-28 38,-18 42,-2 C46,15 35,28 10,30 C-18,32 -38,22 -30,5 Z" fill="#22C55E"/>
+      <g class="eye-blink3"><circle cx="18" cy="-5" r="10" fill="white"/><circle cx="23" cy="-7" r="5" fill="#166534"/></g>
+    </g>
+    <g id="komyaku-flat-yellow">
+      <path d="M-30,5 C-38,-8 -30,-22 -10,-25 C15,-28 38,-18 42,-2 C46,15 35,28 10,30 C-18,32 -38,22 -30,5 Z" fill="#FBBF24"/>
+      <g class="eye-blink1"><circle cx="18" cy="-5" r="10" fill="white"/><circle cx="23" cy="-7" r="5" fill="#B45309"/></g>
+    </g>
+
+    <!-- Gr06/09風: 小さいころん丸型 -->
+    <g id="komyaku-small-red">
+      <path d="M-15,8 C-25,-2 -22,-18 -8,-22 C8,-26 25,-18 28,-2 C31,15 18,26 0,26 C-18,26 -25,18 -15,8 Z" fill="#E8344E"/>
+      <g class="eye-blink2"><circle cx="8" cy="-2" r="8" fill="white"/><circle cx="12" cy="-4" r="4" fill="#9F1239"/></g>
+    </g>
+    <g id="komyaku-small-blue">
+      <path d="M-15,8 C-25,-2 -22,-18 -8,-22 C8,-26 25,-18 28,-2 C31,15 18,26 0,26 C-18,26 -25,18 -15,8 Z" fill="#3B82F6"/>
+      <g class="eye-blink3"><circle cx="8" cy="-2" r="8" fill="white"/><circle cx="12" cy="-4" r="4" fill="#1E3A8A"/></g>
+    </g>
+    <g id="komyaku-small-green">
+      <path d="M-15,8 C-25,-2 -22,-18 -8,-22 C8,-26 25,-18 28,-2 C31,15 18,26 0,26 C-18,26 -25,18 -15,8 Z" fill="#22C55E"/>
+      <g class="eye-blink1"><circle cx="8" cy="-2" r="8" fill="white"/><circle cx="12" cy="-4" r="4" fill="#166534"/></g>
+    </g>
+    <g id="komyaku-small-yellow">
+      <path d="M-15,8 C-25,-2 -22,-18 -8,-22 C8,-26 25,-18 28,-2 C31,15 18,26 0,26 C-18,26 -25,18 -15,8 Z" fill="#FBBF24"/>
+      <g class="eye-blink2"><circle cx="8" cy="-2" r="8" fill="white"/><circle cx="12" cy="-4" r="4" fill="#B45309"/></g>
+    </g>
+
+    <!-- Gr03風: アメーバ型（うねうね縁） -->
+    <g id="komyaku-blob-red">
+      <path d="M-25,-5 C-30,-18 -15,-28 5,-28 C25,-28 38,-15 38,2 C38,18 28,28 12,30 C-5,32 -12,25 -22,18 C-32,10 -35,15 -38,8 C-42,0 -35,-5 -25,-5 Z" fill="#E8344E"/>
+      <g class="eye-blink1"><circle cx="15" cy="-8" r="9" fill="white"/><circle cx="20" cy="-10" r="4.5" fill="#9F1239"/></g>
+    </g>
+    <g id="komyaku-blob-blue">
+      <path d="M-25,-5 C-30,-18 -15,-28 5,-28 C25,-28 38,-15 38,2 C38,18 28,28 12,30 C-5,32 -12,25 -22,18 C-32,10 -35,15 -38,8 C-42,0 -35,-5 -25,-5 Z" fill="#3B82F6"/>
+      <g class="eye-blink2"><circle cx="15" cy="-8" r="9" fill="white"/><circle cx="20" cy="-10" r="4.5" fill="#1E3A8A"/></g>
+    </g>
+    <g id="komyaku-blob-green">
+      <path d="M-25,-5 C-30,-18 -15,-28 5,-28 C25,-28 38,-15 38,2 C38,18 28,28 12,30 C-5,32 -12,25 -22,18 C-32,10 -35,15 -38,8 C-42,0 -35,-5 -25,-5 Z" fill="#22C55E"/>
+      <g class="eye-blink3"><circle cx="15" cy="-8" r="9" fill="white"/><circle cx="20" cy="-10" r="4.5" fill="#166534"/></g>
+    </g>
+    <g id="komyaku-blob-yellow">
+      <path d="M-25,-5 C-30,-18 -15,-28 5,-28 C25,-28 38,-15 38,2 C38,18 28,28 12,30 C-5,32 -12,25 -22,18 C-32,10 -35,15 -38,8 C-42,0 -35,-5 -25,-5 Z" fill="#FBBF24"/>
+      <g class="eye-blink1"><circle cx="15" cy="-8" r="9" fill="white"/><circle cx="20" cy="-10" r="4.5" fill="#B45309"/></g>
+    </g>
+
+    <!-- Gr04風: 小さいしずく（逆向き） -->
+    <g id="komyaku-teardrop-red">
+      <path d="M0,-25 C12,-25 22,-15 22,2 C22,18 12,28 0,32 C-5,28 -8,22 -8,15 C-8,8 -5,-5 0,-12 C5,-5 8,8 8,15 C8,22 5,28 0,32 C-12,28 -22,18 -22,2 C-22,-15 -12,-25 0,-25 Z" fill="#E8344E"/>
+      <g class="eye-blink3"><circle cx="0" cy="-8" r="8" fill="white"/><circle cx="3" cy="-10" r="4" fill="#9F1239"/></g>
+    </g>
+    <g id="komyaku-teardrop-blue">
+      <path d="M0,-25 C12,-25 22,-15 22,2 C22,18 12,28 0,32 C-5,28 -8,22 -8,15 C-8,8 -5,-5 0,-12 C5,-5 8,8 8,15 C8,22 5,28 0,32 C-12,28 -22,18 -22,2 C-22,-15 -12,-25 0,-25 Z" fill="#3B82F6"/>
+      <g class="eye-blink1"><circle cx="0" cy="-8" r="8" fill="white"/><circle cx="3" cy="-10" r="4" fill="#1E3A8A"/></g>
+    </g>
+    <g id="komyaku-teardrop-green">
+      <path d="M0,-25 C12,-25 22,-15 22,2 C22,18 12,28 0,32 C-5,28 -8,22 -8,15 C-8,8 -5,-5 0,-12 C5,-5 8,8 8,15 C8,22 5,28 0,32 C-12,28 -22,18 -22,2 C-22,-15 -12,-25 0,-25 Z" fill="#22C55E"/>
+      <g class="eye-blink2"><circle cx="0" cy="-8" r="8" fill="white"/><circle cx="3" cy="-10" r="4" fill="#166534"/></g>
+    </g>
+    <g id="komyaku-teardrop-yellow">
+      <path d="M0,-25 C12,-25 22,-15 22,2 C22,18 12,28 0,32 C-5,28 -8,22 -8,15 C-8,8 -5,-5 0,-12 C5,-5 8,8 8,15 C8,22 5,28 0,32 C-12,28 -22,18 -22,2 C-22,-15 -12,-25 0,-25 Z" fill="#FBBF24"/>
+      <g class="eye-blink3"><circle cx="0" cy="-8" r="8" fill="white"/><circle cx="3" cy="-10" r="4" fill="#B45309"/></g>
+    </g>
+
+    <!-- グレーのブロブ（装飾用） -->
+    <g id="blob-gray">
+      <path d="M-18,5 C-28,-5 -22,-20 -5,-22 C12,-24 28,-15 28,0 C28,15 15,25 -2,25 C-18,25 -28,18 -18,5 Z" fill="#D1D5DB" opacity="0.5"/>
+    </g>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="100%" height="100%" fill="#F8FAFC"/>
+
+  <!-- グレーのブロブ -->
+  <g class="blob-float" style="animation-delay: 0s;"><use href="#blob-gray" transform="translate(120, 100) scale(1.5)"/></g>
+  <g class="blob-float" style="animation-delay: 2s;"><use href="#blob-gray" transform="translate(250, 180) scale(0.8)"/></g>
+  <g class="blob-float" style="animation-delay: 4s;"><use href="#blob-gray" transform="translate(550, 120) scale(1.2)"/></g>
+  <g class="blob-float" style="animation-delay: 6s;"><use href="#blob-gray" transform="translate(650, 320) scale(1.8)"/></g>
+  <g class="blob-float" style="animation-delay: 3s;"><use href="#blob-gray" transform="translate(150, 420) scale(1.3)"/></g>
+  <g class="blob-float" style="animation-delay: 5s;"><use href="#blob-gray" transform="translate(500, 480) scale(1.0)"/></g>
+  <g class="blob-float" style="animation-delay: 1s;"><use href="#blob-gray" transform="translate(580, 400) scale(1.5)"/></g>
+
+  <!-- 左側のこみゃく（右を向く） -->
+  <g class="komyaku-slow1" style="animation-delay: 0s;"><use href="#komyaku-tail-red" transform="translate(100, 100) scale(0.8)"/></g>
+  <g class="komyaku-rise1" style="animation-delay: 4s;"><use href="#komyaku-drop-blue" transform="translate(90, 480) scale(0.7)"/></g>
+  <g class="komyaku-combo" style="animation-delay: 3s;"><use href="#komyaku-bean-green" transform="translate(160, 280) scale(0.7)"/></g>
+  <g class="komyaku-rise1" style="animation-delay: 1s;"><use href="#komyaku-flat-yellow" transform="translate(140, 170) scale(0.7)"/></g>
+  <g class="komyaku-rise2" style="animation-delay: 2s;"><use href="#komyaku-teardrop-red" transform="translate(120, 380) scale(0.8)"/></g>
+  <g class="komyaku-slow1" style="animation-delay: 2s;"><use href="#komyaku-blob-blue" transform="translate(180, 220) scale(0.7)"/></g>
+  <g class="komyaku-rise2" style="animation-delay: 3s;"><use href="#komyaku-small-green" transform="translate(170, 520) scale(0.9)"/></g>
+  <g class="komyaku-combo" style="animation-delay: 1s;"><use href="#komyaku-small-yellow" transform="translate(150, 130) scale(0.8)"/></g>
+  <g class="komyaku-rise2" style="animation-delay: 5s;"><use href="#komyaku-teardrop-blue" transform="translate(130, 450) scale(0.7)"/></g>
+
+  <!-- 右側のこみゃく（左を向く＝反転） -->
+  <g class="komyaku-wobble" style="animation-delay: 2s;"><use href="#komyaku-flat-blue" transform="translate(680, 120) scale(-0.8, 0.8)"/></g>
+  <g class="komyaku-rise2" style="animation-delay: 0s;"><use href="#komyaku-drop-green" transform="translate(690, 460) scale(-0.7, 0.7)"/></g>
+  <g class="komyaku-slow2" style="animation-delay: 5s;"><use href="#komyaku-tail-yellow" transform="translate(640, 300) scale(-0.7, 0.7)"/></g>
+  <g class="komyaku-slow1" style="animation-delay: 3s;"><use href="#komyaku-bean-red" transform="translate(660, 180) scale(-0.7, 0.7)"/></g>
+  <g class="komyaku-combo" style="animation-delay: 6s;"><use href="#komyaku-teardrop-blue" transform="translate(650, 400) scale(-0.8, 0.8)"/></g>
+  <g class="komyaku-rise1" style="animation-delay: 5s;"><use href="#komyaku-blob-green" transform="translate(620, 250) scale(-0.7, 0.7)"/></g>
+  <g class="komyaku-combo" style="animation-delay: 0s;"><use href="#komyaku-flat-red" transform="translate(600, 520) scale(-0.7, 0.7)"/></g>
+  <g class="komyaku-rise1" style="animation-delay: 3s;"><use href="#komyaku-small-blue" transform="translate(640, 140) scale(-0.8, 0.8)"/></g>
+  <g class="komyaku-slow1" style="animation-delay: 2s;"><use href="#komyaku-teardrop-yellow" transform="translate(630, 480) scale(-0.7, 0.7)"/></g>
+
+  <!-- 上部のこみゃく（下を向く） -->
+  <g class="komyaku-wobble" style="animation-delay: 4s;"><use href="#komyaku-drop-yellow" transform="translate(260, 55) scale(0.6) rotate(180)"/></g>
+  <g class="komyaku-slow2" style="animation-delay: 1s;"><use href="#komyaku-teardrop-red" transform="translate(540, 50) scale(0.7) rotate(180)"/></g>
+  <g class="komyaku-wobble" style="animation-delay: 4s;"><use href="#komyaku-bean-blue" transform="translate(350, 45) scale(0.5)"/></g>
+  <g class="komyaku-slow2" style="animation-delay: 6s;"><use href="#komyaku-blob-green" transform="translate(450, 40) scale(0.5)"/></g>
+  <g class="komyaku-combo" style="animation-delay: 2s;"><use href="#komyaku-drop-red" transform="translate(400, 30) scale(0.65) rotate(180)"/></g>
+  <g class="komyaku-rise1" style="animation-delay: 3s;"><use href="#komyaku-small-blue" transform="translate(310, 35) scale(0.6)"/></g>
+  <g class="komyaku-slow1" style="animation-delay: 5s;"><use href="#komyaku-small-yellow" transform="translate(490, 35) scale(0.6)"/></g>
+
+  <!-- 下部のこみゃく（上を向く） -->
+  <g class="komyaku-slow1" style="animation-delay: 0s;"><use href="#komyaku-drop-red" transform="translate(400, 570) scale(0.65)"/></g>
+  <g class="komyaku-rise1" style="animation-delay: 2s;"><use href="#komyaku-teardrop-blue" transform="translate(310, 560) scale(0.7)"/></g>
+  <g class="komyaku-wobble" style="animation-delay: 4s;"><use href="#komyaku-bean-green" transform="translate(490, 560) scale(0.6)"/></g>
+  <g class="komyaku-combo" style="animation-delay: 1s;"><use href="#komyaku-flat-yellow" transform="translate(360, 550) scale(0.5)"/></g>
+  <g class="komyaku-slow2" style="animation-delay: 3s;"><use href="#komyaku-blob-red" transform="translate(440, 550) scale(0.5)"/></g>
+  <g class="komyaku-rise2" style="animation-delay: 5s;"><use href="#komyaku-small-blue" transform="translate(270, 565) scale(0.7)"/></g>
+  <g class="komyaku-slow1" style="animation-delay: 6s;"><use href="#komyaku-teardrop-green" transform="translate(530, 565) scale(0.6)"/></g>
+
+  <!-- 小さな装飾（中央寄り） -->
+  <g class="komyaku-slow1" style="animation-delay: 3s;"><circle cx="320" cy="30" r="8" fill="#E8344E" opacity="0.6"/></g>
+  <g class="komyaku-slow2" style="animation-delay: 5s;"><circle cx="480" cy="25" r="10" fill="#3B82F6" opacity="0.6"/></g>
+  <g class="komyaku-rise1" style="animation-delay: 2s;"><circle cx="350" cy="580" r="6" fill="#22C55E" opacity="0.6"/></g>
+  <g class="komyaku-wobble" style="animation-delay: 4s;"><circle cx="450" cy="585" r="12" fill="#FBBF24" opacity="0.6"/></g>
+</svg>

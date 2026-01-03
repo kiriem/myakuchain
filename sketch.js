@@ -5,7 +5,7 @@ const COLS = 6;
 const ROWS = 12;
 const HIDDEN_ROWS = 1;
 const TOTAL_ROWS = ROWS + HIDDEN_ROWS;
-const CELL_SIZE = 40;
+let CELL_SIZE = 40;
 const NUM_COLORS = 4;
 
 // ゲーム状態
@@ -61,23 +61,88 @@ let canvasHeight;
 let fieldOffsetX;
 let fieldOffsetY;
 
+// BGM
+let bgm;
+let bgmStarted = false;
+let bgmMuted = false;
+
+// 効果音
+let seChain;
+let seMove;
+let seRotate;
+let seDown;
+let seRelease;
+
 function preload() {
     pieceImages['red'] = loadImage('svg/piece_red.svg');
     pieceImages['green'] = loadImage('svg/piece_green.svg');
     pieceImages['blue'] = loadImage('svg/piece_blue.svg');
     pieceImages['yellow'] = loadImage('svg/piece_yellow.svg');
+
+    // 音声ファイルのロード（エラー時はnullを設定）
+    soundFormats('mp3');
+    bgm = loadSound('src/bgm.mp3', function() {}, function() { bgm = null; });
+    seChain = loadSound('src/chain.mp3', function() {}, function() { seChain = null; });
+    seMove = loadSound('src/move.mp3', function() {}, function() { seMove = null; });
+    seRotate = loadSound('src/rotate.mp3', function() {}, function() { seRotate = null; });
+    seDown = loadSound('src/down.mp3', function() {}, function() { seDown = null; });
+    seRelease = loadSound('src/release.mp3', function() {}, function() { seRelease = null; });
 }
 
 function setup() {
-    canvasWidth = CELL_SIZE * COLS + 200;
-    canvasHeight = CELL_SIZE * ROWS + 60;
-    fieldOffsetX = 20;
-    fieldOffsetY = 50;
-
+    calculateSize();
     let canvas = createCanvas(canvasWidth, canvasHeight);
     canvas.parent('game-container');
-
     gameState = STATE_TITLE;
+
+    // iOSのオーディオコンテキスト対策
+    getAudioContext().suspend();
+
+    // ページ非表示時の処理（メモリ節約）
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            // バックグラウンド時はオーディオを一時停止
+            if (bgm && bgm.isPlaying()) {
+                bgm.pause();
+            }
+            noLoop();
+        } else {
+            // 復帰時に再開
+            loop();
+            if (bgm && bgmStarted && !bgmMuted) {
+                bgm.play();
+            }
+        }
+    });
+}
+
+function calculateSize() {
+    // 利用可能なサイズを取得
+    let container = document.getElementById('game-container');
+    let maxWidth = min(windowWidth - 20, 500);  // 最大幅500px
+    let maxHeight = windowHeight - 250;  // コントロール等のスペースを確保
+
+    // サイドバー(NEXT表示)の幅を考慮
+    let sidebarWidth = 110;
+    let availableFieldWidth = maxWidth - sidebarWidth - 30;
+    let availableFieldHeight = maxHeight - 60;
+
+    // セルサイズを計算（幅と高さの制約から小さい方を採用）
+    let cellFromWidth = floor(availableFieldWidth / COLS);
+    let cellFromHeight = floor(availableFieldHeight / ROWS);
+    CELL_SIZE = min(cellFromWidth, cellFromHeight);
+    CELL_SIZE = constrain(CELL_SIZE, 25, 45);  // 最小25px、最大45px
+
+    // キャンバスサイズを計算
+    canvasWidth = CELL_SIZE * COLS + sidebarWidth + 30;
+    canvasHeight = CELL_SIZE * ROWS + 60;
+    fieldOffsetX = 15;
+    fieldOffsetY = 45;
+}
+
+function windowResized() {
+    calculateSize();
+    resizeCanvas(canvasWidth, canvasHeight);
 }
 
 function initGame() {
@@ -104,6 +169,13 @@ function initGame() {
     nextPiece = createPiecePair();
     nextNextPiece = createPiecePair();
     spawnPiece();
+
+    // BGM再生開始
+    if (bgm && !bgmStarted) {
+        bgm.setVolume(0.3);
+        bgm.loop();
+        bgmStarted = true;
+    }
 }
 
 function createPiecePair() {
@@ -155,39 +227,51 @@ function canPlace(x, y, rotation) {
 function moveLeft() {
     if (canPlace(currentPiece.x - 1, currentPiece.y, currentPiece.rotation)) {
         currentPiece.x--;
+        playSE(seMove);
     }
 }
 
 function moveRight() {
     if (canPlace(currentPiece.x + 1, currentPiece.y, currentPiece.rotation)) {
         currentPiece.x++;
+        playSE(seMove);
     }
 }
 
 function rotateLeft() {
     let newRotation = (currentPiece.rotation + 3) % 4;
+    let rotated = false;
     if (canPlace(currentPiece.x, currentPiece.y, newRotation)) {
         currentPiece.rotation = newRotation;
+        rotated = true;
     } else if (canPlace(currentPiece.x + 1, currentPiece.y, newRotation)) {
         currentPiece.x++;
         currentPiece.rotation = newRotation;
+        rotated = true;
     } else if (canPlace(currentPiece.x - 1, currentPiece.y, newRotation)) {
         currentPiece.x--;
         currentPiece.rotation = newRotation;
+        rotated = true;
     }
+    if (rotated) playSE(seRotate);
 }
 
 function rotateRight() {
     let newRotation = (currentPiece.rotation + 1) % 4;
+    let rotated = false;
     if (canPlace(currentPiece.x, currentPiece.y, newRotation)) {
         currentPiece.rotation = newRotation;
+        rotated = true;
     } else if (canPlace(currentPiece.x + 1, currentPiece.y, newRotation)) {
         currentPiece.x++;
         currentPiece.rotation = newRotation;
+        rotated = true;
     } else if (canPlace(currentPiece.x - 1, currentPiece.y, newRotation)) {
         currentPiece.x--;
         currentPiece.rotation = newRotation;
+        rotated = true;
     }
+    if (rotated) playSE(seRotate);
 }
 
 function canDrop() {
@@ -219,6 +303,7 @@ function placePiece() {
         initPieceState(x2, y2);
     }
 
+    playSE(seRelease);
     gameState = STATE_DROPPING;
 }
 
@@ -542,6 +627,7 @@ function updateChecking() {
         chainCount++;
         eraseTimer = 0;
         gameState = STATE_ERASING;
+        playSE(seChain);
     } else {
         chainCount = 0;
 
@@ -751,11 +837,11 @@ function drawGhostPiece(gridX, gridY, colorIndex) {
 }
 
 function drawNextPiece() {
-    let nextX = fieldOffsetX + CELL_SIZE * COLS + 25;
+    let nextX = fieldOffsetX + CELL_SIZE * COLS + 15;
     let nextY = fieldOffsetY;
-    let boxWidth = 90;
-    let boxHeight1 = 130;
-    let boxHeight2 = 100;
+    let boxWidth = max(70, CELL_SIZE * 2.2);
+    let boxHeight1 = max(100, CELL_SIZE * 3.2);
+    let boxHeight2 = max(80, CELL_SIZE * 2.5);
 
     // NEXT ボックス
     fill(255, 255, 255, 230);
@@ -763,32 +849,70 @@ function drawNextPiece() {
     strokeWeight(2);
     rect(nextX, nextY, boxWidth, boxHeight1, 15);
 
+    // NEXTピースのスケール
+    let pieceScale = CELL_SIZE / 40;
+
     // NEXT ラベル
     fill(232, 52, 78);
     noStroke();
-    textSize(16);
+    textSize(max(12, 14 * pieceScale));
     textStyle(BOLD);
     textAlign(CENTER, TOP);
-    text('NEXT', nextX + boxWidth / 2, nextY + 10);
+    text('NEXT', nextX + boxWidth / 2, nextY + 8);
 
     // NEXTピース
-    drawSmallPiece(nextX + boxWidth / 2, nextY + 55, nextPiece.color2, 1.2);
-    drawSmallPiece(nextX + boxWidth / 2, nextY + 100, nextPiece.color1, 1.2);
+    drawSmallPiece(nextX + boxWidth / 2, nextY + boxHeight1 * 0.4, nextPiece.color2, pieceScale);
+    drawSmallPiece(nextX + boxWidth / 2, nextY + boxHeight1 * 0.75, nextPiece.color1, pieceScale);
 
     // NEXT NEXT ボックス
-    let nextNextY = nextY + boxHeight1 + 15;
+    let nextNextY = nextY + boxHeight1 + 10;
     fill(255, 255, 255, 180);
     stroke(200, 210, 230);
     strokeWeight(2);
-    rect(nextX, nextNextY, boxWidth, boxHeight2, 15);
+    rect(nextX, nextNextY, boxWidth, boxHeight2, 12);
 
     fill(150, 160, 180);
     noStroke();
-    textSize(12);
-    text('NEXT', nextX + boxWidth / 2, nextNextY + 8);
+    textSize(max(10, 11 * pieceScale));
+    text('NEXT', nextX + boxWidth / 2, nextNextY + 6);
 
-    drawSmallPiece(nextX + boxWidth / 2, nextNextY + 45, nextNextPiece.color2, 0.9);
-    drawSmallPiece(nextX + boxWidth / 2, nextNextY + 80, nextNextPiece.color1, 0.9);
+    drawSmallPiece(nextX + boxWidth / 2, nextNextY + boxHeight2 * 0.4, nextNextPiece.color2, pieceScale * 0.8);
+    drawSmallPiece(nextX + boxWidth / 2, nextNextY + boxHeight2 * 0.75, nextNextPiece.color1, pieceScale * 0.8);
+
+    // ミュートボタン
+    drawMuteButton(nextX, nextNextY + boxHeight2 + 10, boxWidth);
+}
+
+function drawMuteButton(x, y, w) {
+    let h = 35;
+
+    // ボタン背景
+    fill(bgmMuted ? 150 : 100, bgmMuted ? 150 : 100, bgmMuted ? 160 : 120);
+    noStroke();
+    rect(x, y, w, h, 10);
+
+    // アイコンと文字
+    fill(255);
+    textSize(12);
+    textStyle(BOLD);
+    textAlign(CENTER, CENTER);
+    text(bgmMuted ? '🔇 OFF' : '🔊 ON', x + w / 2, y + h / 2);
+}
+
+function getMuteButtonBounds() {
+    let nextX = fieldOffsetX + CELL_SIZE * COLS + 15;
+    let nextY = fieldOffsetY;
+    let boxWidth = max(70, CELL_SIZE * 2.2);
+    let boxHeight1 = max(100, CELL_SIZE * 3.2);
+    let boxHeight2 = max(80, CELL_SIZE * 2.5);
+    let nextNextY = nextY + boxHeight1 + 10;
+
+    return {
+        x: nextX,
+        y: nextNextY + boxHeight2 + 10,
+        w: boxWidth,
+        h: 35
+    };
 }
 
 function drawSmallPiece(x, y, colorIndex, pieceScale = 1.0) {
@@ -830,17 +954,19 @@ function drawSmallEye(x, y, size) {
 
 function drawScore() {
     // スコアボックス
+    let boxH = max(28, CELL_SIZE * 0.8);
+    let boxW = max(120, CELL_SIZE * 3.5);
     fill(255, 255, 255, 200);
     stroke(200, 210, 230);
     strokeWeight(2);
-    rect(fieldOffsetX, 8, 150, 32, 10);
+    rect(fieldOffsetX, 8, boxW, boxH, 8);
 
     fill(80, 80, 100);
     noStroke();
-    textSize(18);
+    textSize(max(14, CELL_SIZE * 0.45));
     textStyle(BOLD);
     textAlign(LEFT, CENTER);
-    text('SCORE: ' + score, fieldOffsetX + 15, 24);
+    text('SCORE: ' + score, fieldOffsetX + 10, 8 + boxH / 2);
 }
 
 function drawDeathMark() {
@@ -857,8 +983,8 @@ function drawDeathMark() {
 }
 
 function drawTitleScreen() {
-    let boxW = 300;
-    let boxH = 340;
+    let boxW = min(300, width - 40);
+    let boxH = min(340, height - 40);
     let boxX = width / 2 - boxW / 2;
     let boxY = height / 2 - boxH / 2;
 
@@ -876,23 +1002,23 @@ function drawTitleScreen() {
     // タイトル
     fill(232, 52, 78);
     noStroke();
-    textSize(32);
+    textSize(min(32, boxW * 0.1));
     textStyle(BOLD);
     textAlign(CENTER, CENTER);
-    text('みゃくちぇいん', width / 2, boxY + 50);
+    text('みゃくちぇいん', width / 2, boxY + boxH * 0.15);
 
     // 難易度選択ラベル
     fill(100, 100, 120);
-    textSize(14);
+    textSize(min(14, boxW * 0.045));
     textStyle(NORMAL);
-    text('難易度を選んでスタート', width / 2, boxY + 95);
+    text('難易度を選んでスタート', width / 2, boxY + boxH * 0.28);
 
     // 難易度ボタン
-    let btnW = 220;
-    let btnH = 50;
+    let btnW = min(220, boxW - 40);
+    let btnH = min(50, boxH * 0.14);
     let btnX = width / 2 - btnW / 2;
-    let btnGap = 60;
-    let firstBtnY = boxY + 130;
+    let btnGap = min(60, boxH * 0.17);
+    let firstBtnY = boxY + boxH * 0.38;
 
     // Easy ボタン
     drawDifficultyButton(btnX, firstBtnY, btnW, btnH, 'Easy',
@@ -911,15 +1037,15 @@ function drawDifficultyButton(x, y, w, h, label, color, darkColor, isSelected) {
     // ボタンの影
     noStroke();
     fill(0, 0, 0, 40);
-    rect(x + 2, y + 3, w, h, 12);
+    rect(x + 2, y + 3, w, h, min(12, h * 0.24));
 
     // ボタン本体
     fill(isSelected ? darkColor : color);
-    rect(x, y, w, h, 12);
+    rect(x, y, w, h, min(12, h * 0.24));
 
     // ボタンテキスト
     fill(255);
-    textSize(20);
+    textSize(min(20, h * 0.4));
     textStyle(BOLD);
     textAlign(CENTER, CENTER);
     text(label, x + w / 2, y + h / 2);
@@ -932,13 +1058,14 @@ function drawDifficultyButton(x, y, w, h, label, color, darkColor, isSelected) {
 }
 
 function getDifficultyButtonBounds() {
-    let boxH = 340;
+    let boxW = min(300, width - 40);
+    let boxH = min(340, height - 40);
     let boxY = height / 2 - boxH / 2;
-    let btnW = 220;
-    let btnH = 50;
+    let btnW = min(220, boxW - 40);
+    let btnH = min(50, boxH * 0.14);
     let btnX = width / 2 - btnW / 2;
-    let btnGap = 60;
-    let firstBtnY = boxY + 130;
+    let btnGap = min(60, boxH * 0.17);
+    let firstBtnY = boxY + boxH * 0.38;
 
     return {
         easy: { x: btnX, y: firstBtnY, w: btnW, h: btnH },
@@ -1002,6 +1129,16 @@ function getRestartButtonBounds() {
 }
 
 function mousePressed() {
+    // ミュートボタン（常時有効）
+    if (gameState !== STATE_TITLE) {
+        let muteBtn = getMuteButtonBounds();
+        if (mouseX >= muteBtn.x && mouseX <= muteBtn.x + muteBtn.w &&
+            mouseY >= muteBtn.y && mouseY <= muteBtn.y + muteBtn.h) {
+            toggleMute();
+            return;
+        }
+    }
+
     if (gameState === STATE_TITLE) {
         handleDifficultyClick();
     } else if (gameState === STATE_GAMEOVER) {
@@ -1013,25 +1150,66 @@ function mousePressed() {
     }
 }
 
+function toggleMute() {
+    bgmMuted = !bgmMuted;
+    if (bgm) {
+        if (bgmMuted) {
+            bgm.setVolume(0);
+        } else {
+            bgm.setVolume(0.3);
+        }
+    }
+}
+
+function playSE(sound) {
+    if (sound && !bgmMuted) {
+        try {
+            if (sound.isPlaying()) {
+                sound.stop();
+            }
+            sound.play();
+        } catch (e) {
+            // iOS Safari対策: エラーを無視
+        }
+    }
+}
+
 function handleDifficultyClick() {
     let btns = getDifficultyButtonBounds();
+    let clicked = false;
 
     if (mouseX >= btns.easy.x && mouseX <= btns.easy.x + btns.easy.w &&
         mouseY >= btns.easy.y && mouseY <= btns.easy.y + btns.easy.h) {
         difficulty = DIFFICULTY_EASY;
-        initGame();
+        clicked = true;
     } else if (mouseX >= btns.middle.x && mouseX <= btns.middle.x + btns.middle.w &&
         mouseY >= btns.middle.y && mouseY <= btns.middle.y + btns.middle.h) {
         difficulty = DIFFICULTY_MIDDLE;
-        initGame();
+        clicked = true;
     } else if (mouseX >= btns.hard.x && mouseX <= btns.hard.x + btns.hard.w &&
         mouseY >= btns.hard.y && mouseY <= btns.hard.y + btns.hard.h) {
         difficulty = DIFFICULTY_HARD;
+        clicked = true;
+    }
+
+    if (clicked) {
+        // iOSのオーディオコンテキストを有効化
+        userStartAudio();
         initGame();
     }
 }
 
 function touchStarted() {
+    // ミュートボタン（常時有効）
+    if (gameState !== STATE_TITLE) {
+        let muteBtn = getMuteButtonBounds();
+        if (mouseX >= muteBtn.x && mouseX <= muteBtn.x + muteBtn.w &&
+            mouseY >= muteBtn.y && mouseY <= muteBtn.y + muteBtn.h) {
+            toggleMute();
+            return false;
+        }
+    }
+
     if (gameState === STATE_TITLE) {
         handleDifficultyClick();
         return false;
@@ -1069,6 +1247,7 @@ function keyPressed() {
         rotateRight();
     } else if (keyCode === DOWN_ARROW) {
         dropInterval = 2;
+        playSE(seDown);
     } else if (key === 'r' || key === 'R') {
         gameState = STATE_TITLE;
     }
@@ -1107,12 +1286,19 @@ window.onRotateRight = function() {
     }
 };
 
+let isDropping = false;
+
 window.onDropStart = function() {
     if (gameState === STATE_PLAYING) {
         dropInterval = 2;
+        if (!isDropping) {
+            isDropping = true;
+            playSE(seDown);
+        }
     }
 };
 
 window.onDropRelease = function() {
     dropInterval = baseDropInterval;
+    isDropping = false;
 };

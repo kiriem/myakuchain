@@ -14,6 +14,7 @@
     <meta name="twitter:description" content="こみゃくを使った落ちものパズルゲーム">
     <meta name="twitter:image" content="https://inpw.jp/app/myakuchain/img/logo.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
@@ -57,7 +58,7 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
         }
         #game-logo {
             max-width: 280px;
@@ -177,6 +178,23 @@
             }
         }
 
+        /* 縦幅が足りない場合はロゴを隠す */
+        @media (max-height: 700px) {
+            #game-logo {
+                display: none;
+            }
+            body {
+                padding-top: 5px;
+            }
+            #control-panel {
+                margin-top: 10px;
+                gap: 8px;
+            }
+            .control-btn {
+                height: 45px;
+            }
+        }
+
         /* PC調整 */
         @media (min-width: 601px) {
             #control-panel {
@@ -195,9 +213,22 @@
             }
         }
 
+        /* 更新履歴リンク */
+        .update-link {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #3B82F6;
+            text-decoration: none;
+        }
+        .update-link:hover {
+            text-decoration: underline;
+        }
+
         /* クレジット */
         .credit {
-            margin-top: 20px;
+            margin-top: 10px;
             padding: 10px;
             text-align: center;
             font-size: 0.75rem;
@@ -235,6 +266,9 @@
             ← → : Move | ↑ Z : Rotate Left | X : Rotate Right | ↓ : Drop | R : Restart
         </div>
 
+        <!-- 更新履歴リンク -->
+        <a href="update.html" class="update-link">更新履歴</a>
+
         <!-- クレジット -->
         <footer class="credit">
             Created by Kirie Miyajima <a href="https://x.com/kiriem_" target="_blank">@kiriem_</a>
@@ -252,9 +286,32 @@
 
             let dropIntervalId = null;
 
+            // グローバルなクリーンアップ関数
+            function clearDropInterval() {
+                if (dropIntervalId) {
+                    clearInterval(dropIntervalId);
+                    dropIntervalId = null;
+                    if (typeof window.onDropRelease === 'function') {
+                        window.onDropRelease();
+                    }
+                }
+            }
+
+            // 画面外タッチやフォーカス喪失時のクリーンアップ
+            document.addEventListener('touchend', clearDropInterval);
+            document.addEventListener('touchcancel', clearDropInterval);
+            window.addEventListener('blur', clearDropInterval);
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) clearDropInterval();
+            });
+
             function setupButton(btn, action, isHold = false) {
                 const startEvent = function(e) {
                     e.preventDefault();
+                    e.stopPropagation();
+                    if (isHold) {
+                        clearDropInterval(); // 既存のインターバルをクリア
+                    }
                     action();
                     if (isHold) {
                         dropIntervalId = setInterval(action, 50);
@@ -263,20 +320,15 @@
 
                 const endEvent = function(e) {
                     e.preventDefault();
-                    if (isHold && dropIntervalId) {
-                        clearInterval(dropIntervalId);
-                        dropIntervalId = null;
-                        if (typeof window.onDropRelease === 'function') {
-                            window.onDropRelease();
-                        }
-                    }
+                    e.stopPropagation();
+                    clearDropInterval();
                 };
 
                 btn.addEventListener('touchstart', startEvent, { passive: false });
                 btn.addEventListener('mousedown', startEvent);
 
                 if (isHold) {
-                    btn.addEventListener('touchend', endEvent);
+                    btn.addEventListener('touchend', endEvent, { passive: false });
                     btn.addEventListener('touchcancel', endEvent);
                     btn.addEventListener('mouseup', endEvent);
                     btn.addEventListener('mouseleave', endEvent);

@@ -1,13 +1,15 @@
-# みゃくちぇいん！
+<img width="3168" height="1344" alt="logo" src="https://github.com/user-attachments/assets/ce45a9fa-49a3-4591-9363-91ff1afddadb" />
+
 
 「みゃくちぇいん」は、こみゃくを使った落ちものパズルゲームです。
-
-<img width="1529" height="1067" alt="Image" src="https://github.com/user-attachments/assets/69ac37e4-f465-4c23-b06d-96213e191237" />
 
 
 ## 遊び方
 
 同じ色のこみゃくを4つ以上つなげると消えます。連鎖を狙って高得点を目指しましょう！
+
+<img width="1529" height="1067" alt="Image" src="https://github.com/user-attachments/assets/69ac37e4-f465-4c23-b06d-96213e191237" />
+
 
 ### 操作方法
 

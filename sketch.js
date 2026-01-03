@@ -9,12 +9,19 @@ const CELL_SIZE = 40;
 const NUM_COLORS = 4;
 
 // ゲーム状態
+const STATE_TITLE = -1;
 const STATE_PLAYING = 0;
 const STATE_DROPPING = 1;
 const STATE_CHECKING = 2;
 const STATE_ERASING = 3;
 const STATE_CHAIN_DROPPING = 4;
 const STATE_GAMEOVER = 5;
+
+// 難易度設定
+const DIFFICULTY_EASY = 0;
+const DIFFICULTY_MIDDLE = 1;
+const DIFFICULTY_HARD = 2;
+const DROP_INTERVALS = [45, 30, 18]; // Easy, Middle, Hard
 
 // 色の定義
 const COLOR_NAMES = [null, 'red', 'green', 'blue', 'yellow'];
@@ -34,6 +41,8 @@ let nextNextPiece;
 let gameState;
 let dropTimer;
 let dropInterval;
+let baseDropInterval;
+let difficulty = DIFFICULTY_MIDDLE;
 let score;
 let chainCount;
 let eraseTimer;
@@ -68,7 +77,7 @@ function setup() {
     let canvas = createCanvas(canvasWidth, canvasHeight);
     canvas.parent('game-container');
 
-    initGame();
+    gameState = STATE_TITLE;
 }
 
 function initGame() {
@@ -82,7 +91,8 @@ function initGame() {
 
     gameState = STATE_PLAYING;
     dropTimer = 0;
-    dropInterval = 30;
+    baseDropInterval = DROP_INTERVALS[difficulty];
+    dropInterval = baseDropInterval;
     score = 0;
     chainCount = 0;
     eraseTimer = 0;
@@ -446,6 +456,12 @@ function draw() {
 
     // グラデーション背景
     drawBackground();
+
+    // タイトル画面
+    if (gameState === STATE_TITLE) {
+        drawTitleScreen();
+        return;
+    }
 
     updatePieceStates();
     updateParticles();
@@ -840,6 +856,97 @@ function drawDeathMark() {
     line(x + size, y - size, x - size, y + size);
 }
 
+function drawTitleScreen() {
+    let boxW = 300;
+    let boxH = 340;
+    let boxX = width / 2 - boxW / 2;
+    let boxY = height / 2 - boxH / 2;
+
+    // ボックスの影
+    noStroke();
+    fill(0, 0, 0, 30);
+    rect(boxX + 5, boxY + 5, boxW, boxH, 20);
+
+    // タイトルボックス
+    fill(255, 255, 255, 245);
+    stroke(232, 52, 78);
+    strokeWeight(4);
+    rect(boxX, boxY, boxW, boxH, 20);
+
+    // タイトル
+    fill(232, 52, 78);
+    noStroke();
+    textSize(32);
+    textStyle(BOLD);
+    textAlign(CENTER, CENTER);
+    text('みゃくちぇいん', width / 2, boxY + 50);
+
+    // 難易度選択ラベル
+    fill(100, 100, 120);
+    textSize(14);
+    textStyle(NORMAL);
+    text('難易度を選んでスタート', width / 2, boxY + 95);
+
+    // 難易度ボタン
+    let btnW = 220;
+    let btnH = 50;
+    let btnX = width / 2 - btnW / 2;
+    let btnGap = 60;
+    let firstBtnY = boxY + 130;
+
+    // Easy ボタン
+    drawDifficultyButton(btnX, firstBtnY, btnW, btnH, 'Easy',
+        '#22C55E', '#16A34A', difficulty === DIFFICULTY_EASY);
+
+    // Middle ボタン
+    drawDifficultyButton(btnX, firstBtnY + btnGap, btnW, btnH, 'Middle',
+        '#3B82F6', '#2563EB', difficulty === DIFFICULTY_MIDDLE);
+
+    // Hard ボタン
+    drawDifficultyButton(btnX, firstBtnY + btnGap * 2, btnW, btnH, 'Hard',
+        '#E8344E', '#DC2626', difficulty === DIFFICULTY_HARD);
+}
+
+function drawDifficultyButton(x, y, w, h, label, color, darkColor, isSelected) {
+    // ボタンの影
+    noStroke();
+    fill(0, 0, 0, 40);
+    rect(x + 2, y + 3, w, h, 12);
+
+    // ボタン本体
+    fill(isSelected ? darkColor : color);
+    rect(x, y, w, h, 12);
+
+    // ボタンテキスト
+    fill(255);
+    textSize(20);
+    textStyle(BOLD);
+    textAlign(CENTER, CENTER);
+    text(label, x + w / 2, y + h / 2);
+
+    // 選択中マーク
+    if (isSelected) {
+        fill(255, 255, 255, 80);
+        rect(x + 5, y + 5, w - 10, h / 2 - 5, 8, 8, 0, 0);
+    }
+}
+
+function getDifficultyButtonBounds() {
+    let boxH = 340;
+    let boxY = height / 2 - boxH / 2;
+    let btnW = 220;
+    let btnH = 50;
+    let btnX = width / 2 - btnW / 2;
+    let btnGap = 60;
+    let firstBtnY = boxY + 130;
+
+    return {
+        easy: { x: btnX, y: firstBtnY, w: btnW, h: btnH },
+        middle: { x: btnX, y: firstBtnY + btnGap, w: btnW, h: btnH },
+        hard: { x: btnX, y: firstBtnY + btnGap * 2, w: btnW, h: btnH }
+    };
+}
+
 function drawGameOver() {
     // オーバーレイ
     fill(0, 0, 0, 150);
@@ -895,21 +1002,44 @@ function getRestartButtonBounds() {
 }
 
 function mousePressed() {
-    if (gameState === STATE_GAMEOVER) {
+    if (gameState === STATE_TITLE) {
+        handleDifficultyClick();
+    } else if (gameState === STATE_GAMEOVER) {
         let btn = getRestartButtonBounds();
         if (mouseX >= btn.x && mouseX <= btn.x + btn.w &&
             mouseY >= btn.y && mouseY <= btn.y + btn.h) {
-            initGame();
+            gameState = STATE_TITLE;
         }
     }
 }
 
+function handleDifficultyClick() {
+    let btns = getDifficultyButtonBounds();
+
+    if (mouseX >= btns.easy.x && mouseX <= btns.easy.x + btns.easy.w &&
+        mouseY >= btns.easy.y && mouseY <= btns.easy.y + btns.easy.h) {
+        difficulty = DIFFICULTY_EASY;
+        initGame();
+    } else if (mouseX >= btns.middle.x && mouseX <= btns.middle.x + btns.middle.w &&
+        mouseY >= btns.middle.y && mouseY <= btns.middle.y + btns.middle.h) {
+        difficulty = DIFFICULTY_MIDDLE;
+        initGame();
+    } else if (mouseX >= btns.hard.x && mouseX <= btns.hard.x + btns.hard.w &&
+        mouseY >= btns.hard.y && mouseY <= btns.hard.y + btns.hard.h) {
+        difficulty = DIFFICULTY_HARD;
+        initGame();
+    }
+}
+
 function touchStarted() {
-    if (gameState === STATE_GAMEOVER) {
+    if (gameState === STATE_TITLE) {
+        handleDifficultyClick();
+        return false;
+    } else if (gameState === STATE_GAMEOVER) {
         let btn = getRestartButtonBounds();
         if (mouseX >= btn.x && mouseX <= btn.x + btn.w &&
             mouseY >= btn.y && mouseY <= btn.y + btn.h) {
-            initGame();
+            gameState = STATE_TITLE;
             return false;
         }
     }
@@ -922,7 +1052,7 @@ function keyPressed() {
 
     if (gameState === STATE_GAMEOVER) {
         if (key === 'r' || key === 'R') {
-            initGame();
+            gameState = STATE_TITLE;
         }
         return false;
     }
@@ -940,7 +1070,7 @@ function keyPressed() {
     } else if (keyCode === DOWN_ARROW) {
         dropInterval = 2;
     } else if (key === 'r' || key === 'R') {
-        initGame();
+        gameState = STATE_TITLE;
     }
 
     return false;
@@ -948,7 +1078,7 @@ function keyPressed() {
 
 function keyReleased() {
     if (keyCode === DOWN_ARROW) {
-        dropInterval = 30;
+        dropInterval = baseDropInterval;
     }
 }
 
@@ -984,5 +1114,5 @@ window.onDropStart = function() {
 };
 
 window.onDropRelease = function() {
-    dropInterval = 30;
+    dropInterval = baseDropInterval;
 };
